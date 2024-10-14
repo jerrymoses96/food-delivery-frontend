@@ -1,44 +1,48 @@
 "use client";
-
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
 import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
-import { useLocation } from "../context/LocationContext"; // Import the Location context
+import { useLocation } from "../context/LocationContext";
 
 const Navbar = () => {
   const router = useRouter();
-  const { isLoggedIn, logout } = useAuth();
-  
-  const { selectedLocation, setSelectedLocation } = useLocation(); // Use location context
+  const { isLoggedIn, logout, userType } = useAuth();
+  const { selectedLocation, setSelectedLocation } = useLocation();
   const [locations, setLocations] = useState([]);
 
-  // Fetch locations from the backend
-  useEffect(() => {
-    const fetchLocations = async () => {
-      const token = Cookies.get("access_token");
-      const response = await fetch("http://127.0.0.1:8000/api/location/", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+  const fetchLocations = async () => {
+    const token = Cookies.get("access_token");
+    const response = await fetch("http://127.0.0.1:8000/api/location/", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (response.ok) {
       const data = await response.json();
       setLocations(data);
-    };
+    } else {
+      setLocations([]); // Clear locations if fetch fails
+    }
+  };
 
-    fetchLocations();
-  }, []);
+  useEffect(() => {
+    // Trigger fetching locations when userType changes or login status updates
+    if (isLoggedIn && userType === "normal") {
+      fetchLocations();
+    } else {
+      setLocations([]); // Clear locations for restaurant owners or logged-out users
+    }
+  }, [userType, isLoggedIn]); // Dependency on userType and isLoggedIn
 
-  // Handle location change and update context
   const handleLocationChange = (event) => {
     const location = event.target.value;
-    setSelectedLocation(location); // Update the selected location in the context
+    setSelectedLocation(location);
   };
 
   const handleLogout = () => {
-    Cookies.remove("access_token");
-    Cookies.remove("refresh_token");
     logout();
     router.push("/login");
   };
@@ -58,18 +62,20 @@ const Navbar = () => {
         </li>
         <li>
           {/* Location dropdown */}
-          <select
-            value={selectedLocation}
-            onChange={handleLocationChange}
-            className="bg-gray-700 text-white rounded-md p-2"
-          >
-            <option value="">Select Location</option>
-            {locations.map((location) => (
-              <option key={location.id} value={location.city}>
-                {location.city}
-              </option>
-            ))}
-          </select>
+          {isLoggedIn && userType === "normal" && (
+            <select
+              value={selectedLocation}
+              className="bg-gray-700 text-white rounded-md p-2"
+              onChange={handleLocationChange}
+            >
+              <option value="">Select Location</option>
+              {locations.map((location) => (
+                <option key={location.id} value={location.city}>
+                  {location.city}
+                </option>
+              ))}
+            </select>
+          )}
         </li>
         {isLoggedIn ? (
           <li>
