@@ -3,23 +3,23 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie"; // Ensure js-cookie is installed
+import { useAuth } from "@/context/AuthContext";
 
 export default function Login() {
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     username: "",
     password: "",
   });
   const [message, setMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false); // Loading state
   const router = useRouter();
 
   // Check for existing token on mount
   useEffect(() => {
     const token = Cookies.get("access_token");
     if (token) {
-      // Redirect based on the user type, implement logic to fetch user data if necessary
-      // For now, let's assume if there's a token, the user is logged in
-      // You can add a fetch call to get user role if needed
-      router.push("/user-dashboard"); // Or the respective dashboard
+      router.push("/user-dashboard"); // Redirect if logged in
     }
   }, [router]);
 
@@ -30,6 +30,7 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true); // Set loading to true
     const response = await fetch("http://127.0.0.1:8000/api/login/", {
       method: "POST",
       headers: {
@@ -38,13 +39,14 @@ export default function Login() {
       body: JSON.stringify(formData),
     });
 
+    setIsLoading(false); // Set loading to false after response
+
     if (response.ok) {
       const data = await response.json();
-      // Store tokens in cookies
       Cookies.set("access_token", data.access);
       Cookies.set("refresh_token", data.refresh);
+      login();
 
-      // Fetch user details
       const userResponse = await fetch(
         "http://127.0.0.1:8000/api/user-details/",
         {
@@ -59,7 +61,7 @@ export default function Login() {
         if (userDetails.is_restaurant_owner) {
           router.push("/owner-dashboard");
         } else if (userDetails.is_normal_user) {
-          router.push("/user-dashboard");
+          router.push("/");
         }
       } else {
         setMessage("Failed to fetch user details.");
@@ -74,23 +76,29 @@ export default function Login() {
     <div>
       <h1>Login</h1>
       <form onSubmit={handleSubmit}>
+        <label htmlFor="username">Username</label>
         <input
           type="text"
+          id="username"
           name="username"
           value={formData.username}
           onChange={handleChange}
           placeholder="Username"
           required
         />
+        <label htmlFor="password">Password</label>
         <input
           type="password"
+          id="password"
           name="password"
           value={formData.password}
           onChange={handleChange}
           placeholder="Password"
           required
         />
-        <button type="submit">Login</button>
+        <button type="submit" disabled={isLoading}>
+          {isLoading ? "Logging in..." : "Login"}
+        </button>
       </form>
       {message && <p>{message}</p>}
     </div>
