@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
+import { useCart } from "@/context/cartContext"; // Import the cart context
 
 const RestaurantMenuPage = ({ params }) => {
   const router = useRouter();
@@ -10,6 +11,7 @@ const RestaurantMenuPage = ({ params }) => {
   const [menuItems, setMenuItems] = useState([]);
   const [restaurantDetails, setRestaurantDetails] = useState(null);
   const [locations, setLocations] = useState([]); // State to hold locations
+  const { addToCart } = useCart(); // Use the cart context
 
   useEffect(() => {
     const fetchMenuItems = async () => {
@@ -62,6 +64,18 @@ const RestaurantMenuPage = ({ params }) => {
     return location ? location.city : "Unknown Location"; // Fallback to "Unknown Location" if not found
   };
 
+  // Update the handleAddToCart function to add items to the cart context
+  const handleAddToCart = (itemId) => {
+    const quantityInput = document.getElementById(`quantity-${itemId}`);
+    const quantity = parseInt(quantityInput.value);
+
+    const menuItem = menuItems.find((item) => item.id === itemId);
+    if (menuItem) {
+      addToCart({ ...menuItem, quantity }); // Add item with quantity
+      console.log("Added to cart:", menuItem);
+    }
+  };
+
   return (
     <div className="max-w-5xl mx-auto p-4">
       {/* Restaurant Details */}
@@ -69,7 +83,8 @@ const RestaurantMenuPage = ({ params }) => {
         <div className="mb-8 border-b pb-4">
           <h1 className="text-4xl font-bold mb-2">{restaurantDetails.name}</h1>
           <p className="text-gray-600 text-lg">
-            {getLocationName(restaurantDetails.location)} {/* Displaying location name */}
+            {getLocationName(restaurantDetails.location)}{" "}
+            {/* Displaying location name */}
           </p>
           <img
             src={restaurantDetails.image}
@@ -98,7 +113,9 @@ const RestaurantMenuPage = ({ params }) => {
               <div className="p-4">
                 <h3 className="text-lg font-semibold">{item.name}</h3>
                 <p className="text-gray-700">{item.description}</p>
-                <p className="font-bold text-xl mt-2">${item.price}</p>
+                <p className="font-bold text-xl mt-2">
+                  ${parseFloat(item.price).toFixed(2)}
+                </p>
                 <div className="mt-4 flex items-center">
                   <label htmlFor={`quantity-${item.id}`} className="mr-2">
                     Quantity:
@@ -126,11 +143,6 @@ const RestaurantMenuPage = ({ params }) => {
       )}
     </div>
   );
-};
-
-const handleAddToCart = (itemId) => {
-  // Add logic for adding items to cart
-  console.log("Add to cart:", itemId);
 };
 
 export default RestaurantMenuPage;

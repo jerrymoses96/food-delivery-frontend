@@ -77,6 +77,9 @@ const Navbar = () => {
             </select>
           )}
         </li>
+        <li>
+          <Link href={"/cart"}>cart</Link>
+        </li>
         {isLoggedIn ? (
           <li>
             <button
