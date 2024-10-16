@@ -1,7 +1,7 @@
 "use client";
-
 import { useCart } from "@/context/cartContext"; // Import the cart context
 import { useRouter } from "next/navigation";
+import Cookies from "js-cookie"; // To get the auth token
 
 const CartPage = () => {
   const { cartItems, updateCartItemQuantity, removeFromCart } = useCart(); // Access cart context
@@ -9,8 +9,8 @@ const CartPage = () => {
   console.log(cartItems);
 
   // Calculate total price
-  const calculateTotal = () => {
-    return cartItems
+  const calculateTotal = (items) => {
+    return items
       .reduce((total, item) => total + item.price * item.quantity, 0)
       .toFixed(2);
   };
@@ -27,6 +27,56 @@ const CartPage = () => {
   // Handle removing item from cart
   const handleRemoveFromCart = (itemId) => {
     removeFromCart(itemId);
+  };
+
+  // Handle placing the order
+  const handlePlaceOrder = async () => {
+    const token = Cookies.get("access_token"); // Get the token
+
+    // Group items by restaurant
+    const ordersByRestaurant = cartItems.reduce((acc, item) => {
+      const restaurant = item.restaurant; // Using the restaurant field from your data
+      if (!acc[restaurant]) {
+        acc[restaurant] = [];
+      }
+      acc[restaurant].push(item);
+      return acc;
+    }, {});
+
+    // Place orders for each restaurant
+    for (const [restaurant, items] of Object.entries(ordersByRestaurant)) {
+      const orderData = {
+        restaurant: restaurant, // Restaurant ID
+        total_price: calculateTotal(items), // Total for this restaurant
+        order_items: items.map((item) => ({
+          menu_item: item.id, // Assuming item.id is the ID of the MenuItem
+          quantity: item.quantity,
+        })),
+      };
+
+      try {
+        const response = await fetch("http://127.0.0.1:8000/api/orders/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(orderData),
+        });
+
+        if (!response.ok) {
+          console.error(
+            "Failed to place the order for restaurant:",
+            restaurant
+          );
+        }
+      } catch (error) {
+        console.error("Error placing order for restaurant:", restaurant, error);
+      }
+    }
+
+    // Redirect to orders page after placing all orders
+    router.push("/user-orders");
   };
 
   return (
@@ -61,6 +111,10 @@ const CartPage = () => {
                       className="w-16 p-1 border rounded-md"
                     />
                   </div>
+                  <p className="text-sm text-gray-500">
+                    Restaurant ID: {item.restaurant}{" "}
+                    {/* Display restaurant ID for debugging */}
+                  </p>
                 </div>
                 <button
                   onClick={() => handleRemoveFromCart(item.id)}
@@ -72,12 +126,14 @@ const CartPage = () => {
             ))}
           </ul>
           <div className="mt-6">
-            <h2 className="text-2xl font-bold">Total: ${calculateTotal()}</h2>
+            <h2 className="text-2xl font-bold">
+              Total: ${calculateTotal(cartItems)}
+            </h2>
             <button
-              onClick={() => router.push("/checkout")} // Redirect to checkout page
+              onClick={handlePlaceOrder} // Place order
               className="mt-4 bg-green-500 text-white p-2 rounded-md hover:bg-green-600 transition duration-200"
             >
-              Proceed to Checkout
+              Place Order
             </button>
           </div>
         </div>
