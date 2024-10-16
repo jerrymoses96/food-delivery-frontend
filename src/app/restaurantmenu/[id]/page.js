@@ -1,9 +1,12 @@
+// src/app/restaurantmenu/[id]/page.js
+
 "use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import { useCart } from "@/context/cartContext"; // Import the cart context
+import toast, { Toaster } from "react-hot-toast"; // Import react-hot-toast
 
 const RestaurantMenuPage = ({ params }) => {
   const router = useRouter();
@@ -64,7 +67,7 @@ const RestaurantMenuPage = ({ params }) => {
     return location ? location.city : "Unknown Location"; // Fallback to "Unknown Location" if not found
   };
 
-  // Update the handleAddToCart function to add items to the cart context
+  // Update the handleAddToCart function to trigger a toast notification
   const handleAddToCart = (itemId) => {
     const quantityInput = document.getElementById(`quantity-${itemId}`);
     const quantity = parseInt(quantityInput.value);
@@ -72,12 +75,43 @@ const RestaurantMenuPage = ({ params }) => {
     const menuItem = menuItems.find((item) => item.id === itemId);
     if (menuItem) {
       addToCart({ ...menuItem, quantity }); // Add item with quantity
-      console.log("Added to cart:", menuItem);
+
+      // Trigger a toast notification when the item is added to the cart
+      toast.success(`${menuItem.name} added to your cart!`, {
+        duration: 3000, // Toast stays for 3 seconds
+        style: {
+          background: "#333", // Dark background
+          color: "#fff", // White text
+        },
+      });
     }
   };
 
   return (
     <div className="max-w-5xl mx-auto p-4">
+      {/* Toaster to show notifications */}
+      <Toaster
+        position="bottom-right" // Set position to bottom-right
+        reverseOrder={false}
+        toastOptions={{
+          // Custom transition options
+          success: {
+            duration: 3000,
+            style: {
+              background: "#4caf50",
+              color: "#fff",
+            },
+          },
+          error: {
+            duration: 3000,
+            style: {
+              background: "#f44336",
+              color: "#fff",
+            },
+          },
+        }}
+      />
+
       {/* Restaurant Details */}
       {restaurantDetails ? (
         <div className="mb-8 border-b pb-4">

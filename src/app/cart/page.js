@@ -43,7 +43,8 @@ const CartPage = () => {
                 <div>
                   <h2 className="text-lg font-semibold">{item.name}</h2>
                   <p className="text-gray-700">
-                    Price: ${item.price.toFixed(2)}
+                    Price: $
+                    {isNaN(item.price) ? "N/A" : Number(item.price).toFixed(2)}
                   </p>
                   <div className="flex items-center mt-2">
                     <label htmlFor={`quantity-${item.id}`} className="mr-2">

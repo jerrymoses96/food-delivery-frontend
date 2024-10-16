@@ -5,11 +5,13 @@ import { useAuth } from "../context/AuthContext";
 import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
 import { useLocation } from "../context/LocationContext";
+import { useCart } from "@/context/cartContext"; // Import the cart context
 
 const Navbar = () => {
   const router = useRouter();
   const { isLoggedIn, logout, userType } = useAuth();
   const { selectedLocation, setSelectedLocation } = useLocation();
+  const { cartItems } = useCart(); // Access cart items from the context
   const [locations, setLocations] = useState([]);
 
   const fetchLocations = async () => {
@@ -47,6 +49,12 @@ const Navbar = () => {
     router.push("/login");
   };
 
+  // Get the total count of items in the cart
+  const cartItemCount = cartItems.reduce(
+    (total, item) => total + item.quantity,
+    0
+  );
+
   return (
     <nav className="flex justify-between items-center p-4 bg-gray-800 text-white">
       <h1>Food Delivery App</h1>
@@ -77,8 +85,15 @@ const Navbar = () => {
             </select>
           )}
         </li>
-        <li>
-          <Link href={"/cart"}>cart</Link>
+        <li className="relative">
+          <Link href="/cart" className="flex items-center">
+            Cart
+            {cartItemCount > 0 && (
+              <span className="ml-2 bg-red-500 text-white text-sm px-1  rounded-full">
+                {cartItemCount}
+              </span>
+            )}
+          </Link>
         </li>
         {isLoggedIn ? (
           <li>
