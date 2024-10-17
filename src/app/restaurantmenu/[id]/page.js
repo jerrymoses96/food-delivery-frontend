@@ -1,5 +1,3 @@
-// src/app/restaurantmenu/[id]/page.js
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -19,7 +17,7 @@ const RestaurantMenuPage = ({ params }) => {
   useEffect(() => {
     const fetchMenuItems = async () => {
       try {
-        const token = Cookies.get("access_token"); // Get token if needed for other secure calls
+        const token = Cookies.get("access_token");
 
         // Fetch all restaurants
         const restaurantRes = await fetch(
@@ -39,13 +37,13 @@ const RestaurantMenuPage = ({ params }) => {
           },
         });
         const locationData = await locationRes.json();
-        setLocations(locationData); // Set locations data
+        setLocations(locationData);
 
         // Find the specific restaurant by ID
         const specificRestaurant = allRestaurants.find(
           (restaurant) => restaurant.id === parseInt(id)
         );
-        setRestaurantDetails(specificRestaurant); // Set specific restaurant details
+        setRestaurantDetails(specificRestaurant);
 
         // Fetch menu items for the selected restaurant
         const menuRes = await fetch(
@@ -61,27 +59,24 @@ const RestaurantMenuPage = ({ params }) => {
     fetchMenuItems();
   }, [id]);
 
-  // Function to get location name by ID
   const getLocationName = (locationId) => {
     const location = locations.find((loc) => loc.id === locationId);
-    return location ? location.city : "Unknown Location"; // Fallback to "Unknown Location" if not found
+    return location ? location.city : "Unknown Location";
   };
 
-  // Update the handleAddToCart function to trigger a toast notification
   const handleAddToCart = (itemId) => {
     const quantityInput = document.getElementById(`quantity-${itemId}`);
     const quantity = parseInt(quantityInput.value);
 
     const menuItem = menuItems.find((item) => item.id === itemId);
     if (menuItem) {
-      addToCart({ ...menuItem, quantity }); // Add item with quantity
+      addToCart({ ...menuItem, quantity });
 
-      // Trigger a toast notification when the item is added to the cart
       toast.success(`${menuItem.name} added to your cart!`, {
-        duration: 3000, // Toast stays for 3 seconds
+        duration: 3000,
         style: {
-          background: "#333", // Dark background
-          color: "#fff", // White text
+          background: "#333",
+          color: "#fff",
         },
       });
     }
@@ -89,55 +84,43 @@ const RestaurantMenuPage = ({ params }) => {
 
   return (
     <div className="max-w-5xl mx-auto p-4">
-      {/* Toaster to show notifications */}
-      <Toaster
-        position="bottom-right" // Set position to bottom-right
-        reverseOrder={false}
-        toastOptions={{
-          // Custom transition options
-          success: {
-            duration: 3000,
-            style: {
-              background: "#4caf50",
-              color: "#fff",
-            },
-          },
-          error: {
-            duration: 3000,
-            style: {
-              background: "#f44336",
-              color: "#fff",
-            },
-          },
-        }}
-      />
+      <style jsx>{`
+        /* Hide the spinner arrows for number inputs in Chrome, Safari, and Edge */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+        }
+        /* Hide the spinner arrows for number inputs in Firefox */
+        input[type="number"] {
+          -moz-appearance: textfield; /* Remove arrows in Firefox */
+        }
+      `}</style>
+      <Toaster position="bottom-right" reverseOrder={false} />
 
-      {/* Restaurant Details */}
       {restaurantDetails ? (
         <div className="mb-8 border-b pb-4">
           <h1 className="text-4xl font-bold mb-2">{restaurantDetails.name}</h1>
           <p className="text-gray-600 text-lg">
-            {getLocationName(restaurantDetails.location)}{" "}
-            {/* Displaying location name */}
+            {getLocationName(restaurantDetails.location)}
           </p>
           <img
             src={restaurantDetails.image}
             alt={restaurantDetails.name}
-            className="w-full h-64 object-cover rounded-lg mt-4"
+            className="w-full h-64 object-cover rounded-lg mt-4 shadow-lg"
           />
         </div>
       ) : (
         <p>Loading restaurant details...</p>
       )}
 
-      {/* Menu Items */}
       <h2 className="text-3xl font-bold mt-4">Menu Items</h2>
       {menuItems.length > 0 ? (
-        <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
           {menuItems.map((item) => (
-            <li
+            <div
               key={item.id}
-              className="border shadow-md rounded-lg overflow-hidden"
+              className="border rounded-lg overflow-hidden shadow-lg transition-transform transform hover:scale-105"
             >
               <img
                 src={item.image}
@@ -151,16 +134,42 @@ const RestaurantMenuPage = ({ params }) => {
                   ${parseFloat(item.price).toFixed(2)}
                 </p>
                 <div className="mt-4 flex items-center">
-                  <label htmlFor={`quantity-${item.id}`} className="mr-2">
-                    Quantity:
-                  </label>
+                  {/* Decrement Button */}
+                  <button
+                    onClick={() => {
+                      const quantityInput = document.getElementById(
+                        `quantity-${item.id}`
+                      );
+                      let quantity = parseInt(quantityInput.value);
+                      if (quantity > 1) {
+                        quantityInput.value = quantity - 1;
+                      }
+                    }}
+                    className="bg-gray-200 text-gray-800 p-2 rounded-l-md border border-gray-400 hover:bg-gray-300 transition duration-200"
+                  >
+                    -
+                  </button>
+                  {/* Quantity Input */}
                   <input
                     id={`quantity-${item.id}`}
                     type="number"
                     min="1"
                     defaultValue="1"
-                    className="w-16 p-1 border rounded-md"
+                    className="w-12 p-2 border-t border-b border-gray-400 text-center rounded-none focus:outline-none focus:ring focus:border-blue-300"
                   />
+                  {/* Increment Button */}
+                  <button
+                    onClick={() => {
+                      const quantityInput = document.getElementById(
+                        `quantity-${item.id}`
+                      );
+                      let quantity = parseInt(quantityInput.value);
+                      quantityInput.value = quantity + 1;
+                    }}
+                    className="bg-gray-200 text-gray-800 p-2 rounded-r-md border border-gray-400 hover:bg-gray-300 transition duration-200"
+                  >
+                    +
+                  </button>
                   <button
                     onClick={() => handleAddToCart(item.id)}
                     className="bg-blue-500 text-white p-2 rounded-md ml-2 hover:bg-blue-600 transition duration-200"
@@ -169,9 +178,9 @@ const RestaurantMenuPage = ({ params }) => {
                   </button>
                 </div>
               </div>
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
       ) : (
         <p className="mt-4">No menu items available for this restaurant.</p>
       )}

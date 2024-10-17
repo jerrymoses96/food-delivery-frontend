@@ -2,11 +2,12 @@
 import { useCart } from "@/context/cartContext"; // Import the cart context
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie"; // To get the auth token
+import { FaTrash } from "react-icons/fa"; // Importing trash icon for remove button
 
 const CartPage = () => {
-  const { cartItems, updateCartItemQuantity, removeFromCart } = useCart(); // Access cart context
+  const { cartItems, updateCartItemQuantity, removeFromCart, clearCart } =
+    useCart(); // Access cart context
   const router = useRouter();
-  console.log(cartItems);
 
   // Calculate total price
   const calculateTotal = (items) => {
@@ -18,8 +19,7 @@ const CartPage = () => {
   // Handle quantity change
   const handleQuantityChange = (itemId, quantity) => {
     if (quantity < 1) {
-      // Prevent quantity from going below 1
-      return;
+      return; // Prevent quantity from going below 1
     }
     updateCartItemQuantity(itemId, quantity);
   };
@@ -46,10 +46,10 @@ const CartPage = () => {
     // Place orders for each restaurant
     for (const [restaurant, items] of Object.entries(ordersByRestaurant)) {
       const orderData = {
-        restaurant: restaurant, // Restaurant ID
+        restaurant: Number(restaurant), // Ensure this is a number
         total_price: calculateTotal(items), // Total for this restaurant
         order_items: items.map((item) => ({
-          menu_item: item.id, // Assuming item.id is the ID of the MenuItem
+          menu_item: item.id, // Send only the ID of the menu item
           quantity: item.quantity,
         })),
       };
@@ -69,14 +69,16 @@ const CartPage = () => {
             "Failed to place the order for restaurant:",
             restaurant
           );
+        } else {
+          const responseData = await response.json();
+          console.log("Order placed successfully:", responseData);
         }
       } catch (error) {
         console.error("Error placing order for restaurant:", restaurant, error);
       }
     }
-
-    // Redirect to orders page after placing all orders
-    router.push("/user-orders");
+    clearCart(); // Clear the cart
+    router.push("/user-orders"); // Redirect to orders page
   };
 
   return (
@@ -88,7 +90,7 @@ const CartPage = () => {
             {cartItems.map((item) => (
               <li
                 key={item.id}
-                className="border rounded-lg p-4 flex justify-between items-center"
+                className="border rounded-lg p-4 flex justify-between items-center shadow-md hover:shadow-lg transition duration-200"
               >
                 <div>
                   <h2 className="text-lg font-semibold">{item.name}</h2>
@@ -111,16 +113,12 @@ const CartPage = () => {
                       className="w-16 p-1 border rounded-md"
                     />
                   </div>
-                  <p className="text-sm text-gray-500">
-                    Restaurant ID: {item.restaurant}{" "}
-                    {/* Display restaurant ID for debugging */}
-                  </p>
                 </div>
                 <button
                   onClick={() => handleRemoveFromCart(item.id)}
-                  className="bg-red-500 text-white p-2 rounded-md hover:bg-red-600 transition duration-200"
+                  className="bg-red-500 text-white p-2 rounded-md hover:bg-red-600 transition duration-200 flex items-center"
                 >
-                  Remove
+                  <FaTrash className="mr-1" /> Remove
                 </button>
               </li>
             ))}
