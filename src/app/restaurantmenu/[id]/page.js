@@ -14,6 +14,16 @@ const RestaurantMenuPage = ({ params }) => {
   const [locations, setLocations] = useState([]); // State to hold locations
   const { addToCart } = useCart(); // Use the cart context
 
+  // Utility function to convert time to AM/PM format
+  const formatTime = (time) => {
+    const [hour, minute] = time.split(":");
+    const hours = parseInt(hour, 10);
+    const minutesFormatted = minute.padStart(2, "0");
+    const ampm = hours >= 12 ? "PM" : "AM";
+    const formattedHour = hours % 12 || 12;
+    return `${formattedHour}:${minutesFormatted} ${ampm}`;
+  };
+
   useEffect(() => {
     const fetchMenuItems = async () => {
       try {
@@ -44,6 +54,7 @@ const RestaurantMenuPage = ({ params }) => {
           (restaurant) => restaurant.id === parseInt(id)
         );
         setRestaurantDetails(specificRestaurant);
+        console.log(restaurantDetails);
 
         // Fetch menu items for the selected restaurant
         const menuRes = await fetch(
@@ -99,16 +110,36 @@ const RestaurantMenuPage = ({ params }) => {
       <Toaster position="bottom-right" reverseOrder={false} />
 
       {restaurantDetails ? (
-        <div className="mb-8 border-b pb-4">
-          <h1 className="text-4xl font-bold mb-2">{restaurantDetails.name}</h1>
-          <p className="text-gray-600 text-lg">
+        <div className="mb-8 border-b pb-4 text-center bg-gray-100 rounded-lg shadow-md p-4">
+          <h1 className="text-4xl font-bold mb-2 text-blue-600">
+            {restaurantDetails.name}
+          </h1>
+          <p className="text-gray-700 text-lg mb-2">
             {getLocationName(restaurantDetails.location)}
           </p>
           <img
             src={restaurantDetails.image}
             alt={restaurantDetails.name}
-            className="w-full h-64 object-cover rounded-lg mt-4 shadow-lg"
+            className="w-full h-64 object-cover rounded-lg mt-4 shadow-lg border border-gray-300"
           />
+          <div className="mt-4">
+            <p className="text-gray-500 italic">
+              Delicious food served with love!
+            </p>
+            <div className="flex justify-center items-center mt-2">
+              <div className="bg-green-100 text-green-800 p-2 rounded-md mx-2">
+                <strong>Open:</strong>{" "}
+                {formatTime(restaurantDetails.opening_time)}
+              </div>
+              <div className="bg-red-100 text-red-800 p-2 rounded-md mx-2">
+                <strong>Close:</strong>{" "}
+                {formatTime(restaurantDetails.closing_time)}
+              </div>
+            </div>
+            <p className="text-gray-600 mt-2">
+              Estimated Delivery Time: <strong>20 mins</strong>
+            </p>
+          </div>
         </div>
       ) : (
         <p>Loading restaurant details...</p>
