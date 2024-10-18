@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import { useCart } from "@/context/cartContext"; // Import the cart context
-import toast, { Toaster } from "react-hot-toast"; // Import react-hot-toast
+import {toast} from "react-hot-toast"; // Import react-hot-toast
 
 const RestaurantMenuPage = ({ params }) => {
   const router = useRouter();
@@ -107,13 +107,10 @@ const RestaurantMenuPage = ({ params }) => {
           -moz-appearance: textfield; /* Remove arrows in Firefox */
         }
       `}</style>
-      <Toaster position="bottom-right" reverseOrder={false} />
 
       {restaurantDetails ? (
         <div className="mb-8 border-b pb-4 text-center bg-gray-100 rounded-lg shadow-md p-4">
-          <h1 className="text-4xl font-bold mb-2 text-blue-600">
-            {restaurantDetails.name}
-          </h1>
+          <h1 className="text-4xl font-bold mb-2 ">{restaurantDetails.name}</h1>
           <p className="text-gray-700 text-lg mb-2">
             {getLocationName(restaurantDetails.location)}
           </p>

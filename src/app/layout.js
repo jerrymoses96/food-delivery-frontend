@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import { AuthProvider } from "@/context/AuthContext";
 import { LocationProvider } from "@/context/LocationContext";
 import { CartProvider } from "@/context/cartContext";
+import { Toaster } from "react-hot-toast";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -26,13 +27,15 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased w-[90%] mx-auto`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased  mx-auto`}
       >
         <AuthProvider>
           <LocationProvider>
             <CartProvider>
+              <Toaster />
               <Navbar />
-              {children}
+              <div className="mx-auto w-[95%]">{children}</div>{" "}
+              {/* Centered with 95% width */}
               <Footer />
             </CartProvider>
           </LocationProvider>

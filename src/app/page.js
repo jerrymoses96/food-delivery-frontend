@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import RestaurantCard from "../components/RestaurantCard";
 import Navbar from "../components/Navbar";
@@ -9,13 +8,12 @@ import { useLocation } from "../context/LocationContext";
 export default function HomePage() {
   const [restaurants, setRestaurants] = useState([]);
   const [filteredRestaurants, setFilteredRestaurants] = useState([]);
-  const [locations, setLocations] = useState([]); // Store location data
+  const [locations, setLocations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const { selectedLocation } = useLocation(); // Get selected location from context
+  const { selectedLocation } = useLocation();
 
   useEffect(() => {
-    // Fetch restaurants
     const fetchRestaurants = async () => {
       try {
         const token = Cookies.get("access_token");
@@ -41,7 +39,6 @@ export default function HomePage() {
       }
     };
 
-    // Fetch locations
     const fetchLocations = async () => {
       try {
         const token = Cookies.get("access_token");
@@ -67,14 +64,13 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    // Find location ID from the selected city name
     const locationObj = locations.find(
       (location) => location.city === selectedLocation
     );
     const locationId = locationObj ? locationObj.id : null;
 
     if (locationId === null) {
-      setFilteredRestaurants(restaurants); // Show all if no location is selected
+      setFilteredRestaurants(restaurants);
     } else {
       const filtered = restaurants.filter(
         (restaurant) => restaurant.location === locationId
@@ -98,10 +94,10 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gray-100 py-10">
-      <h1 className="text-3xl font-bold text-center mb-10">Restaurants</h1>
+      <h1 className="text-4xl font-bold text-center mb-10">Restaurants</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 px-5">
         {filteredRestaurants.map((restaurant, index) => (
-          <RestaurantCard key={index} restaurant={restaurant} />
+          <RestaurantCard key={index} restaurant={restaurant} locations={locations} />
         ))}
       </div>
     </div>

@@ -56,68 +56,66 @@ const Navbar = () => {
   );
 
   return (
-    <nav className="flex justify-between items-center p-4 bg-gray-800 text-white">
-      <h1>Food Delivery App</h1>
-      <ul className="flex gap-8 items-center">
-        <li>
-          <Link href="/">Home</Link>
-        </li>
-        <li>
-          <Link href="/user-orders">Orders</Link>
-        </li>
-        <li>
-          <Link href="/restaurants">Restaurants</Link>
-        </li>
-        <li>
-          <Link href="/profile">Profile</Link>
-        </li>
-        <li>
-          {/* Location dropdown */}
-          {isLoggedIn && userType === "normal" && (
-            <select
-              value={selectedLocation}
-              className="bg-gray-700 text-white rounded-md p-2"
-              onChange={handleLocationChange}
-            >
-              <option value="">Select Location</option>
-              {locations.map((location) => (
-                <option key={location.id} value={location.city}>
-                  {location.city}
-                </option>
-              ))}
-            </select>
-          )}
-        </li>
-        <li className="relative">
-          <Link href="/cart" className="flex items-center">
-            Cart
-            {cartItemCount > 0 && (
-              <span className="ml-2 bg-red-500 text-white text-sm px-1  rounded-full">
-                {cartItemCount}
-              </span>
-            )}
-          </Link>
-        </li>
-        {isLoggedIn ? (
+    <nav className=" bg-gray-800 text-white ">
+      <div className="w-[95%] flex justify-between items-center py-4 mx-auto">
+        <h1>Food Delivery App</h1>
+        <ul className="flex gap-8 items-center">
           <li>
-            <button
-              onClick={handleLogout}
-              className="bg-red-500 text-white rounded-md p-2"
-            >
-              Logout
-            </button>
+            <Link href="/">Restaurants</Link>
           </li>
-        ) : (
-          <>
+          <li>
+            <Link href="/user-orders">Orders</Link>
+          </li>
+          <li className="relative">
+            <Link href="/cart" className="flex items-center">
+              Cart
+              {cartItemCount > 0 && (
+                <span className="ml-2 bg-red-500 text-white text-sm px-1  rounded-full">
+                  {cartItemCount}
+                </span>
+              )}
+            </Link>
+          </li>
+
+          <li>
+            {/* Location dropdown */}
+            {isLoggedIn && userType === "normal" && (
+              <select
+                value={selectedLocation}
+                className="bg-gray-700 text-white rounded-md p-2"
+                onChange={handleLocationChange}
+              >
+                <option value="">Select Location</option>
+                {locations.map((location) => (
+                  <option key={location.id} value={location.city}>
+                    {location.city}
+                  </option>
+                ))}
+              </select>
+            )}
+          </li>
+
+          {isLoggedIn ? (
             <li>
-              <Link href="/login">Login</Link>
+              <button
+                onClick={handleLogout}
+                className="bg-red-500 text-white rounded-md p-2"
+              >
+                Logout
+              </button>
             </li>
-            <li>
-              <Link href="/signup">Sign Up</Link>
-            </li>
-          </>
-        )}
-      </ul>
+          ) : (
+            <>
+              <li>
+                <Link href="/login">Login</Link>
+              </li>
+              <li>
+                <Link href="/signup">Sign Up</Link>
+              </li>
+            </>
+          )}
+        </ul>
+      </div>
     </nav>
   );
 };
