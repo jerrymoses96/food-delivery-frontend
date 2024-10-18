@@ -13,13 +13,16 @@ function UserOrders() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await fetch("http://127.0.0.1:8000/api/user-details/", {
-          // Adjust the endpoint based on your backend
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await fetch(
+          "http://127.0.0.1:8000/api/user-details/",
+          {
+            // Adjust the endpoint based on your backend
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         if (!response.ok) {
           throw new Error("Failed to fetch user");
@@ -91,15 +94,48 @@ function UserOrders() {
               </p>
               <p>
                 <span
-                  className={`font-semibold ${
-                    order.status === "Delivered"
-                      ? "text-green-600"
-                      : "text-yellow-600"
+                  className={`font-semibold flex items-center ${
+                    order.status === "delivered"
+                      ? "text-green-600 bg-green-100 border border-green-200 rounded-md p-2 transition duration-300 ease-in-out transform hover:scale-105"
+                      : "text-yellow-600 bg-yellow-100 border border-yellow-200 rounded-md p-2 transition duration-300 ease-in-out transform hover:scale-105"
                   }`}
                 >
+                  {/* Optional: Add an icon for visual appeal */}
+                  {order.status === "delivered" ? (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 mr-2"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12l2 2 4-4m5 2a9 9 0 11-9-9 9 9 0 019 9z"
+                      />
+                    </svg>
+                  ) : (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 mr-2"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13 16h-1v-4h1m4 0h-1m-4 0h-1m2-4h-2m3 0h-2m-4 0H9m-2 0H6m0 0v8m0 0H4a2 2 0 01-2-2V5a2 2 0 012-2h4a2 2 0 012 2v8a2 2 0 01-2 2H4z"
+                      />
+                    </svg>
+                  )}
                   Status: {order.status}
                 </span>
               </p>
+
               <p>
                 <strong>Total Price:</strong> ${order.total_price}
               </p>

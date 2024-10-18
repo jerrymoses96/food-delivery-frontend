@@ -67,7 +67,11 @@ export default function Login() {
       }
     } else {
       const errorData = await response.json();
-      setMessage(errorData.error || "Login failed. Please try again.");
+      console.log(errorData);
+
+      setMessage(
+        errorData.non_field_errors || "Login failed. Please try again."
+      );
     }
   };
 
@@ -125,7 +129,7 @@ export default function Login() {
           <p className="text-sm text-gray-600">Don't have an account?</p>
           <button
             onClick={() => router.push("/signup")}
-            className= "text-sm text-purple-600 hover:underline"
+            className="text-sm text-purple-600 hover:underline"
           >
             Sign Up
           </button>
