@@ -63,9 +63,14 @@ const Navbar = () => {
         <ul className="flex gap-8 items-center">
           {/* Show Orders link only for restaurant owners */}
           {isLoggedIn && userType === "restaurant" && (
-            <li>
-              <Link href={"/owner-dashboard/orders"}>Orders</Link>
-            </li>
+            <>
+              <li>
+                <Link href={"/owner-dashboard"}>Dashboard</Link>
+              </li>
+              <li>
+                <Link href={"/owner-dashboard/orders"}>Orders</Link>
+              </li>
+            </>
           )}
           {/* Only show the following links if the user is a normal user */}
           {isLoggedIn && userType === "normal" && (
