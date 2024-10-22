@@ -42,6 +42,10 @@ const Navbar = () => {
     }
   }, [userType, isLoggedIn]);
 
+  const handleLinkClick = () => {
+    setMenuOpen(false); // Close the mobile menu when a link is clicked
+  };
+
   const handleLocationChange = (event) => {
     const location = event.target.value;
     setSelectedLocation(location);
@@ -80,7 +84,7 @@ const Navbar = () => {
 
   return (
     <nav className="bg-gray-800 text-white">
-      <div className=" flex justify-between items-center py-6 mx-auto w-[95%] ">
+      <div className="flex justify-between items-center py-6 mx-auto w-[95%]">
         <h1 className="text-2xl font-bold">
           <Link href={userType === "normal" ? "/" : "/owner-dashboard"}>
             Food Delivery App
@@ -88,15 +92,16 @@ const Navbar = () => {
         </h1>
 
         <button
-          ref={hamburgerRef} // Attach ref to hamburger button
+          ref={hamburgerRef}
           className="lg:hidden text-white text-3xl focus:outline-none"
           onClick={() => setMenuOpen(!menuOpen)}
         >
           &#9776;
         </button>
+
         <ul
-          ref={menuRef} // Attach ref to the menu container
-          className={`flex flex-col lg:flex-row gap-6 items-center lg:static absolute bg-gray-800 w-full z-20   lg:w-auto transition-all duration-300 ease-in-out ${
+          ref={menuRef}
+          className={`flex flex-col lg:flex-row gap-6 items-center lg:static absolute bg-gray-800 w-full z-20 lg:w-auto transition-all duration-300 ease-in-out ${
             menuOpen ? "top-20 pb-10" : "-top-full"
           }`}
         >
@@ -104,7 +109,11 @@ const Navbar = () => {
           {isLoggedIn && userType === "restaurant" && (
             <>
               <li>
-                <Link href="/owner-dashboard" className="hover:text-gray-300">
+                <Link
+                  href="/owner-dashboard"
+                  className="hover:text-gray-300"
+                  onClick={handleLinkClick}
+                >
                   Dashboard
                 </Link>
               </li>
@@ -112,6 +121,7 @@ const Navbar = () => {
                 <Link
                   href="/owner-dashboard/orders"
                   className="hover:text-gray-300"
+                  onClick={handleLinkClick}
                 >
                   Orders
                 </Link>
@@ -123,12 +133,20 @@ const Navbar = () => {
           {isLoggedIn && userType === "normal" && (
             <>
               <li>
-                <Link href="/" className="hover:text-gray-300">
+                <Link
+                  href="/"
+                  className="hover:text-gray-300"
+                  onClick={handleLinkClick}
+                >
                   Restaurants
                 </Link>
               </li>
               <li>
-                <Link href="/user-orders" className="hover:text-gray-300">
+                <Link
+                  href="/user-orders"
+                  className="hover:text-gray-300"
+                  onClick={handleLinkClick}
+                >
                   Orders
                 </Link>
               </li>
@@ -136,6 +154,7 @@ const Navbar = () => {
                 <Link
                   href="/cart"
                   className="flex items-center hover:text-gray-300"
+                  onClick={handleLinkClick}
                 >
                   Cart
                   {cartItemCount > 0 && (
@@ -176,12 +195,20 @@ const Navbar = () => {
           ) : (
             <>
               <li>
-                <Link href="/login" className="hover:text-gray-300">
+                <Link
+                  href="/login"
+                  className="hover:text-gray-300"
+                  onClick={handleLinkClick}
+                >
                   Login
                 </Link>
               </li>
               <li>
-                <Link href="/signup" className="hover:text-gray-300">
+                <Link
+                  href="/signup"
+                  className="hover:text-gray-300"
+                  onClick={handleLinkClick}
+                >
                   Sign Up
                 </Link>
               </li>

@@ -193,6 +193,13 @@ export default function OwnerDashboard() {
         throw new Error("Failed to update restaurant times.");
       }
 
+      // Update the restaurantData state with the new times
+      setRestaurantData((prevData) => ({
+        ...prevData,
+        opening_time: updatedTimes.opening_time,
+        closing_time: updatedTimes.closing_time,
+      }));
+
       const data = await response.json();
       console.log("Times updated:", data);
     } catch (error) {

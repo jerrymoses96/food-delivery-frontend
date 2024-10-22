@@ -65,7 +65,7 @@ const OwnerOrdersPage = () => {
   }
 
   return (
-    <div className="container mx-auto p-6 h-screen">
+    <div className="container mx-auto p-6 ">
       <h1 className="text-4xl font-bold text-center mb-8 text-[#FF6600]">
         Your Orders
       </h1>
@@ -86,77 +86,86 @@ const OwnerOrdersPage = () => {
       </div>
 
       <ul className="space-y-6">
-        {filteredOrders
-          .slice()
-          .reverse()
-          .map((order) => (
-            <li
-              key={order.id}
-              className="border rounded-lg shadow-md p-6 bg-white hover:shadow-xl transition-shadow duration-300"
-            >
-              <h2 className="text-2xl font-bold mb-2">Order ID: {order.id}</h2>
-              <p className="text-gray-700 mb-1">
-                Restaurant:{" "}
-                <span className="font-semibold">{order.restaurant.name}</span>
-              </p>
-              <p className="text-gray-700 mb-1">
-                Total Price:{" "}
-                <span className="font-semibold">${order.total_price}</span>
-              </p>
-              <p className="text-gray-700 mb-1">
-                Status:{" "}
-                <span
-                  className={`font-semibold ${
-                    order.status === "Delivered"
-                      ? "text-green-600"
-                      : order.status === "Shipped"
-                      ? "text-blue-600"
-                      : "text-yellow-600"
-                  }`}
-                >
-                  {order.status}
-                </span>
-              </p>
-              <p className="text-gray-700 mb-1">
-                Created At: {new Date(order.created_at).toLocaleString()}
-              </p>
-              <p className="text-gray-700 mb-4">
-                User: <span className="font-semibold">{order.user}</span>
-              </p>
-              {/* Display the username here */}
-              <h3 className="font-semibold mb-2">Order Items:</h3>
-              <ul className="list-disc ml-5 space-y-1">
-                {order.order_items.map((item) => (
-                  <li key={item.id} className="flex justify-between">
-                    <span>
-                      {item.quantity} x {item.menu_item.name}
-                    </span>
-                    <span>${item.menu_item.price}</span>
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-4 flex space-x-2">
-                <button
-                  onClick={() => updateOrderStatus(order.id, "packing")}
-                  className="bg-yellow-500 text-white px-4 py-2 rounded-lg transition-transform transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-opacity-50"
-                >
-                  Packing
-                </button>
-                <button
-                  onClick={() => updateOrderStatus(order.id, "shipped")}
-                  className="bg-blue-500 text-white px-4 py-2 rounded-lg transition-transform transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-                >
-                  Shipped
-                </button>
-                <button
-                  onClick={() => updateOrderStatus(order.id, "delivered")}
-                  className="bg-green-500 text-white px-4 py-2 rounded-lg transition-transform transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
-                >
-                  Delivered
-                </button>
-              </div>
-            </li>
-          ))}
+        {filteredOrders.length === 0 ? (
+          <li className="border rounded-lg shadow-md  p-6 bg-white text-center">
+            <p className="text-gray-700 mb-1">
+              No orders matching your criteria.
+            </p>
+          </li>
+        ) : (
+          filteredOrders
+            .slice()
+            .reverse()
+            .map((order) => (
+              <li
+                key={order.id}
+                className="border rounded-lg shadow-md p-6 bg-white hover:shadow-xl transition-shadow duration-300"
+              >
+                <h2 className="text-2xl font-bold mb-2">
+                  Order ID: {order.id}
+                </h2>
+                <p className="text-gray-700 mb-1">
+                  Restaurant:{" "}
+                  <span className="font-semibold">{order.restaurant.name}</span>
+                </p>
+                <p className="text-gray-700 mb-1">
+                  Total Price:{" "}
+                  <span className="font-semibold">${order.total_price}</span>
+                </p>
+                <p className="text-gray-700 mb-1">
+                  Status:{" "}
+                  <span
+                    className={`font-semibold ${
+                      order.status === "Delivered"
+                        ? "text-green-600"
+                        : order.status === "Shipped"
+                        ? "text-blue-600"
+                        : "text-yellow-600"
+                    }`}
+                  >
+                    {order.status}
+                  </span>
+                </p>
+                <p className="text-gray-700 mb-1">
+                  Created At: {new Date(order.created_at).toLocaleString()}
+                </p>
+                <p className="text-gray-700 mb-4">
+                  User: <span className="font-semibold">{order.user}</span>
+                </p>
+                <h3 className="font-semibold mb-2">Order Items:</h3>
+                <ul className="list-disc ml-5 space-y-1">
+                  {order.order_items.map((item) => (
+                    <li key={item.id} className="flex justify-between">
+                      <span>
+                        {item.quantity} x {item.menu_item.name}
+                      </span>
+                      <span>${item.menu_item.price}</span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-4 flex space-x-2">
+                  <button
+                    onClick={() => updateOrderStatus(order.id, "packing")}
+                    className="bg-yellow-500 text-white px-4 py-2 rounded-lg transition-transform transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-opacity-50"
+                  >
+                    Packing
+                  </button>
+                  <button
+                    onClick={() => updateOrderStatus(order.id, "shipped")}
+                    className="bg-blue-500 text-white px-4 py-2 rounded-lg transition-transform transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                  >
+                    Shipped
+                  </button>
+                  <button
+                    onClick={() => updateOrderStatus(order.id, "delivered")}
+                    className="bg-green-500 text-white px-4 py-2 rounded-lg transition-transform transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
+                  >
+                    Delivered
+                  </button>
+                </div>
+              </li>
+            ))
+        )}
       </ul>
     </div>
   );

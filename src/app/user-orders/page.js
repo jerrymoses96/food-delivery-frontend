@@ -162,7 +162,7 @@ function UserOrders() {
             ))}
         </div>
       ) : (
-        <p>You have no orders yet.</p>
+        <p className="h-screen">You have no orders yet.</p>
       )}
     </div>
   );

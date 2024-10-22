@@ -92,7 +92,7 @@ const CartPage = () => {
         <FaShoppingCart className="mr-2 text-green-500" /> Your Cart
       </h1>
       {cartItems.length > 0 ? (
-        <div className="h-dvh">
+        <div>
           <ul className="space-y-4 ">
             {cartItems.map((item) => (
               <li
@@ -156,7 +156,7 @@ const CartPage = () => {
           </div>
         </div>
       ) : (
-        <div className=" w-full text-gray-500">
+        <div className=" w-full h-screen text-gray-500">
           <div className="flex text-2xl font-bold items-center justify-center h-dvh">
             Your cart is empty.
           </div>
