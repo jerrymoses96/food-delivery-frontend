@@ -3,17 +3,20 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
 import Cookies from "js-cookie";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useLocation } from "../context/LocationContext";
-import { useCart } from "@/context/cartContext"; // Import the cart context
+import { useCart } from "@/context/cartContext";
 
 const Navbar = () => {
   const router = useRouter();
   const { isLoggedIn, logout, userType } = useAuth();
   const { selectedLocation, setSelectedLocation } = useLocation();
-  const { cartItems } = useCart(); // Access cart items from the context
+  const { cartItems } = useCart();
   const [locations, setLocations] = useState([]);
-  console.log(userType);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const menuRef = useRef(null); // Ref for the menu container
+  const hamburgerRef = useRef(null); // Ref for the hamburger button
 
   const fetchLocations = async () => {
     const token = Cookies.get("access_token");
@@ -32,13 +35,12 @@ const Navbar = () => {
   };
 
   useEffect(() => {
-    // Trigger fetching locations when userType changes or login status updates
     if (isLoggedIn && userType === "normal") {
       fetchLocations();
     } else {
       setLocations([]); // Clear locations for restaurant owners or logged-out users
     }
-  }, [userType, isLoggedIn]); // Dependency on userType and isLoggedIn
+  }, [userType, isLoggedIn]);
 
   const handleLocationChange = (event) => {
     const location = event.target.value;
@@ -48,44 +50,96 @@ const Navbar = () => {
   const handleLogout = () => {
     logout();
     router.push("/login");
+    setMenuOpen(false); // Close menu after logout
   };
 
-  // Get the total count of items in the cart
   const cartItemCount = cartItems.reduce(
     (total, item) => total + item.quantity,
     0
   );
 
+  // Close menu when clicking outside of it
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // Check if the click is outside the menu and not on the hamburger button
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(event.target) &&
+        hamburgerRef.current &&
+        !hamburgerRef.current.contains(event.target)
+      ) {
+        setMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [menuRef, hamburgerRef]);
+
   return (
-    <nav className=" bg-gray-800 text-white ">
-      <div className="w-[95%] flex justify-between items-center py-4 mx-auto">
-        <h1>Food Delivery App</h1>
-        <ul className="flex gap-8 items-center">
-          {/* Show Orders link only for restaurant owners */}
+    <nav className="bg-gray-800 text-white">
+      <div className=" flex justify-between items-center py-6 mx-auto w-[95%] ">
+        <h1 className="text-2xl font-bold">
+          <Link href={userType === "normal" ? "/" : "/owner-dashboard"}>
+            Food Delivery App
+          </Link>
+        </h1>
+
+        <button
+          ref={hamburgerRef} // Attach ref to hamburger button
+          className="lg:hidden text-white text-3xl focus:outline-none"
+          onClick={() => setMenuOpen(!menuOpen)}
+        >
+          &#9776;
+        </button>
+        <ul
+          ref={menuRef} // Attach ref to the menu container
+          className={`flex flex-col lg:flex-row gap-6 items-center lg:static absolute bg-gray-800 w-full z-20   lg:w-auto transition-all duration-300 ease-in-out ${
+            menuOpen ? "top-20 pb-10" : "-top-full"
+          }`}
+        >
+          {/* Show Dashboard and Orders only for restaurant owners */}
           {isLoggedIn && userType === "restaurant" && (
             <>
               <li>
-                <Link href={"/owner-dashboard"}>Dashboard</Link>
+                <Link href="/owner-dashboard" className="hover:text-gray-300">
+                  Dashboard
+                </Link>
               </li>
               <li>
-                <Link href={"/owner-dashboard/orders"}>Orders</Link>
+                <Link
+                  href="/owner-dashboard/orders"
+                  className="hover:text-gray-300"
+                >
+                  Orders
+                </Link>
               </li>
             </>
           )}
-          {/* Only show the following links if the user is a normal user */}
+
+          {/* Normal user links: Restaurants, Orders, Cart, Location selector */}
           {isLoggedIn && userType === "normal" && (
             <>
               <li>
-                <Link href="/">Restaurants</Link>
+                <Link href="/" className="hover:text-gray-300">
+                  Restaurants
+                </Link>
               </li>
               <li>
-                <Link href="/user-orders">Orders</Link>
+                <Link href="/user-orders" className="hover:text-gray-300">
+                  Orders
+                </Link>
               </li>
               <li className="relative">
-                <Link href="/cart" className="flex items-center">
+                <Link
+                  href="/cart"
+                  className="flex items-center hover:text-gray-300"
+                >
                   Cart
                   {cartItemCount > 0 && (
-                    <span className="ml-2 bg-red-500 text-white text-sm px-1 rounded-full">
+                    <span className="ml-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
                       {cartItemCount}
                     </span>
                   )}
@@ -93,11 +147,10 @@ const Navbar = () => {
               </li>
 
               <li>
-                {/* Location dropdown */}
                 <select
                   value={selectedLocation}
-                  className="bg-gray-700 text-white rounded-md p-2"
                   onChange={handleLocationChange}
+                  className="bg-gray-700 text-white rounded-md p-2 border border-gray-600 hover:border-gray-400"
                 >
                   <option value="">Select Location</option>
                   {locations.map((location) => (
@@ -110,11 +163,12 @@ const Navbar = () => {
             </>
           )}
 
+          {/* Authentication Links */}
           {isLoggedIn ? (
             <li>
               <button
                 onClick={handleLogout}
-                className="bg-red-500 text-white rounded-md p-2"
+                className="bg-red-600 hover:bg-red-500 text-white rounded-md px-4 py-2 transition duration-200"
               >
                 Logout
               </button>
@@ -122,10 +176,14 @@ const Navbar = () => {
           ) : (
             <>
               <li>
-                <Link href="/login">Login</Link>
+                <Link href="/login" className="hover:text-gray-300">
+                  Login
+                </Link>
               </li>
               <li>
-                <Link href="/signup">Sign Up</Link>
+                <Link href="/signup" className="hover:text-gray-300">
+                  Sign Up
+                </Link>
               </li>
             </>
           )}

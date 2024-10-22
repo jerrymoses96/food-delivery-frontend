@@ -4,6 +4,7 @@ import RestaurantCard from "../components/RestaurantCard";
 import Navbar from "../components/Navbar";
 import Cookies from "js-cookie";
 import { useLocation } from "../context/LocationContext";
+import Head from "next/head";
 
 export default function HomePage() {
   const [restaurants, setRestaurants] = useState([]);
@@ -93,11 +94,15 @@ export default function HomePage() {
     );
 
   return (
-    <div className="min-h-screen bg-gray-100 py-10">
+    <div className="min-h-screen py-10">
       <h1 className="text-4xl font-bold text-center mb-10">Restaurants</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 px-5">
         {filteredRestaurants.map((restaurant, index) => (
-          <RestaurantCard key={index} restaurant={restaurant} locations={locations} />
+          <RestaurantCard
+            key={index}
+            restaurant={restaurant}
+            locations={locations}
+          />
         ))}
       </div>
     </div>

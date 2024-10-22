@@ -22,6 +22,10 @@ export default function OwnerDashboard() {
     description: "",
     image: null,
   });
+  const [updatedTimes, setUpdatedTimes] = useState({
+    opening_time: "",
+    closing_time: "",
+  });
 
   const router = useRouter();
 
@@ -165,6 +169,42 @@ export default function OwnerDashboard() {
     }
   };
 
+  const handleUpdateTimes = async (e) => {
+    e.preventDefault();
+    const token = Cookies.get("access_token");
+
+    try {
+      const response = await fetch(
+        `http://localhost:8000/api/restaurant/${restaurantData.id}/`,
+        {
+          method: "PATCH", // Use PATCH for partial updates
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // Include JWT token here
+          },
+          body: JSON.stringify({
+            opening_time: updatedTimes.opening_time,
+            closing_time: updatedTimes.closing_time,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update restaurant times.");
+      }
+
+      const data = await response.json();
+      console.log("Times updated:", data);
+    } catch (error) {
+      console.error("Error updating times:", error);
+    }
+  };
+
+  const handleTimeChange = (e) => {
+    const { name, value } = e.target;
+    setUpdatedTimes((prev) => ({ ...prev, [name]: value }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -208,13 +248,13 @@ export default function OwnerDashboard() {
   };
 
   return (
-    <div className="p-8 bg-gray-50 min-h-screen">
+    <div className="p-8 min-h-screen bg-gray-100">
       <h1 className="text-4xl font-extrabold mb-4 text-gray-800">
         Owner Dashboard
       </h1>
 
       {restaurantData ? (
-        <div className="bg-white shadow-md p-6 rounded-lg border border-gray-200">
+        <div className="bg-white shadow-lg p-6 rounded-lg border border-gray-200">
           <h3 className="text-3xl font-bold text-gray-800 mt-6 mb-4">
             Restaurants
           </h3>
@@ -222,162 +262,271 @@ export default function OwnerDashboard() {
             {restaurantData.name}
           </h2>
           <p className="text-gray-600 flex items-center">
-            <FaClock className="mr-2" /> Location:{" "}
-            {getLocationNameById(restaurantData.location)}
+            <FaClock className="mr-2" />
+            Opening Time: {formatTimeToAMPM(restaurantData.opening_time)} -
+            Closing Time: {formatTimeToAMPM(restaurantData.closing_time)}
           </p>
-          <p className="text-gray-600 flex items-center">
-            <FaClock className="mr-2" /> Opening Time:{" "}
-            {formatTimeToAMPM(restaurantData.opening_time)}
+          <p className="text-gray-600 mb-2">
+            Location: {getLocationNameById(restaurantData.location)}
           </p>
-          <p className="text-gray-600 flex items-center">
-            <FaClock className="mr-2" /> Closing Time:{" "}
-            {formatTimeToAMPM(restaurantData.closing_time)}
-          </p>
-          {restaurantData.image && (
-            <img
-              src={restaurantData.image}
-              alt="Restaurant"
-              className="w-full h-64 object-cover rounded-md my-4 shadow-md border border-gray-300"
-            />
-          )}
+          <img
+            src={restaurantData.image}
+            alt={restaurantData.name}
+            className="w-full h-64 object-cover rounded-lg mb-4"
+          />
 
-          <h3 className="text-3xl font-bold text-gray-800 mt-6 mb-4">
-            Menu Items
+          <h3 className="text-xl font-semibold text-gray-800">Menu Items</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+            {menuItems.map((item) => (
+              <div
+                key={item.id}
+                className="bg-white p-4 rounded-lg shadow-md border border-gray-200"
+              >
+                <img
+                  src={item.image}
+                  alt={item.name}
+                  className="w-full h-40 object-cover rounded-lg"
+                />
+                <h3 className="text-lg font-semibold text-gray-800 mt-2">
+                  {item.name}
+                </h3>
+                <p className="text-gray-600">${item.price}</p>
+                <p className="text-gray-600">{item.description}</p>
+              </div>
+            ))}
+          </div>
+
+          <h3 className="text-3xl font-semibold text-gray-800 mt-6 mb-4">
+            Update Opening and Closing Times
           </h3>
-          {menuItems?.length > 0 ? (
-            <ul className="space-y-4">
-              {menuItems.map((item) => (
-                <li
-                  key={item.id}
-                  className="bg-gray-100 p-4 rounded-md shadow border border-gray-200"
+          <form
+            onSubmit={handleUpdateTimes}
+            className="bg-white shadow-md rounded-lg p-6"
+          >
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="mb-4 w-full md:w-1/2">
+                <label
+                  htmlFor="opening_time"
+                  className="block text-sm font-medium text-gray-700 mb-2"
                 >
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-lg font-medium text-gray-800">
-                      {item.name}
-                    </h4>
-                    {/* <FaTrashAlt
-                      className="text-red-600 cursor-pointer hover:text-red-800"
-                      title="Delete Menu Item"
-                    /> */}
-                  </div>
-                  <p className="text-gray-600">{item.description}</p>
-                  <p className="text-gray-800 font-semibold">
-                    Price: ${item.price}
-                  </p>
-                  {item.image && (
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="w-full h-32 object-cover rounded-md mt-2 shadow-md border border-gray-300"
-                    />
-                  )}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-gray-600">No menu items available.</p>
-          )}
+                  Opening Time
+                </label>
+                <input
+                  type="time"
+                  name="opening_time"
+                  value={updatedTimes.opening_time}
+                  onChange={handleTimeChange}
+                  className="mt-1 block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent sm:text-sm transition duration-150 ease-in-out"
+                />
+              </div>
 
-          <form onSubmit={addMenuItem} className="mt-8">
-            <h3 className="text-2xl font-bold text-gray-800 mb-4">
-              Add Menu Item
-            </h3>
-            <input
-              type="text"
-              name="name"
-              placeholder="Item Name"
-              value={newMenuItem.name}
-              onChange={handleMenuItemChange}
-              required
-              className="w-full p-2 border border-gray-300 rounded-md mb-2"
-            />
-            <input
-              type="text"
-              name="price"
-              placeholder="Price"
-              value={newMenuItem.price}
-              onChange={handleMenuItemChange}
-              required
-              className="w-full p-2 border border-gray-300 rounded-md mb-2"
-            />
-            <textarea
-              name="description"
-              placeholder="Description"
-              value={newMenuItem.description}
-              onChange={handleMenuItemChange}
-              required
-              className="w-full p-2 border border-gray-300 rounded-md mb-2"
-            />
-            <input
-              type="file"
-              onChange={handleMenuImageChange}
-              className="w-full mb-4"
-              required
-            />
+              <div className="mb-4 w-full md:w-1/2">
+                <label
+                  htmlFor="closing_time"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Closing Time
+                </label>
+                <input
+                  type="time"
+                  name="closing_time"
+                  value={updatedTimes.closing_time}
+                  onChange={handleTimeChange}
+                  className="mt-1 block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent sm:text-sm transition duration-150 ease-in-out"
+                />
+              </div>
+            </div>
             <button
               type="submit"
-              className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-200"
+              className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
             >
-              <FaPlusCircle className="mr-2" /> Add Menu Item
+              Update Times
             </button>
           </form>
         </div>
       ) : (
-        <div className="bg-white shadow-md p-6 rounded-lg border border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">
-            Create a Restaurant
-          </h2>
+        <div>
+          <h2 className="text-2xl font-bold mb-4">Create Restaurant</h2>
           <form onSubmit={handleSubmit}>
-            <input
-              type="text"
-              name="name"
-              placeholder="Restaurant Name"
-              value={newRestaurantData.name}
-              onChange={handleRestaurantChange}
-              required
-              className="w-full p-2 border border-gray-300 rounded-md mb-2"
-            />
-            <select
-              name="location"
-              value={newRestaurantData.location}
-              onChange={handleRestaurantChange}
-              required
-              className="w-full p-2 border border-gray-300 rounded-md mb-2"
-            >
-              <option value="">Select Location</option>
-              {locations.map((location) => (
-                <option key={location.id} value={location.id}>
-                  {location.city}
-                </option>
-              ))}
-            </select>
-            <input
-              type="time"
-              name="opening_time"
-              value={newRestaurantData.opening_time}
-              onChange={handleRestaurantChange}
-              required
-              className="w-full p-2 border border-gray-300 rounded-md mb-2"
-            />
-            <input
-              type="time"
-              name="closing_time"
-              value={newRestaurantData.closing_time}
-              onChange={handleRestaurantChange}
-              required
-              className="w-full p-2 border border-gray-300 rounded-md mb-2"
-            />
-            <input
-              type="file"
-              onChange={handleImageChange}
-              required
-              className="w-full mb-4"
-            />
+            <div className="mb-4">
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Restaurant Name
+              </label>
+              <input
+                type="text"
+                name="name"
+                value={newRestaurantData.name}
+                onChange={handleRestaurantChange}
+                className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                required
+              />
+            </div>
+
+            <div className="mb-4">
+              <label
+                htmlFor="location"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Location
+              </label>
+              <select
+                name="location"
+                value={newRestaurantData.location}
+                onChange={handleRestaurantChange}
+                className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                required
+              >
+                <option value="">Select Location</option>
+                {locations.map((location) => (
+                  <option key={location.id} value={location.id}>
+                    {location.city}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="mb-4">
+                <label
+                  htmlFor="opening_time"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Opening Time
+                </label>
+                <input
+                  type="time"
+                  name="opening_time"
+                  value={newRestaurantData.opening_time}
+                  onChange={handleRestaurantChange}
+                  className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  required
+                />
+              </div>
+
+              <div className="mb-4">
+                <label
+                  htmlFor="closing_time"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Closing Time
+                </label>
+                <input
+                  type="time"
+                  name="closing_time"
+                  value={newRestaurantData.closing_time}
+                  onChange={handleRestaurantChange}
+                  className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="mb-4">
+              <label
+                htmlFor="image"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Restaurant Image
+              </label>
+              <input
+                type="file"
+                name="image"
+                onChange={handleImageChange}
+                className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                accept="image/*"
+                required
+              />
+            </div>
+
             <button
               type="submit"
-              className="flex items-center bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition duration-200"
+              className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-500"
             >
-              <FaPlusCircle className="mr-2" /> Create Restaurant
+              Create Restaurant
+            </button>
+          </form>
+        </div>
+      )}
+
+      {restaurantData && (
+        <div className="mt-8">
+          <h2 className="text-2xl font-bold mb-4">Add Menu Item</h2>
+          <form onSubmit={addMenuItem}>
+            <div className="mb-4">
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Item Name
+              </label>
+              <input
+                type="text"
+                name="name"
+                value={newMenuItem.name}
+                onChange={handleMenuItemChange}
+                className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                required
+              />
+            </div>
+
+            <div className="mb-4">
+              <label
+                htmlFor="price"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Price
+              </label>
+              <input
+                type="number"
+                name="price"
+                value={newMenuItem.price}
+                onChange={handleMenuItemChange}
+                className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                required
+              />
+            </div>
+
+            <div className="mb-4">
+              <label
+                htmlFor="description"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Description
+              </label>
+              <textarea
+                name="description"
+                value={newMenuItem.description}
+                onChange={handleMenuItemChange}
+                className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                required
+              />
+            </div>
+
+            <div className="mb-4">
+              <label
+                htmlFor="image"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Menu Item Image
+              </label>
+              <input
+                type="file"
+                name="image"
+                onChange={handleMenuImageChange}
+                className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                accept="image/*"
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-500"
+            >
+              Add Menu Item
             </button>
           </form>
         </div>
